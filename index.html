@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: monospace;
+      }
+
+      body {
+        background-color: #050d18;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+      }
+
+      .container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
+      }
+
+      .input-row {
+        display: flex;
+        align-items: center;
+      }
+
+      input[type="password"] {
+        padding: 10px 16px;
+        border: 3px solid black;
+        border-right: none;
+        border-radius: 0;
+        background: transparent;
+        font-size: 16px;
+        outline: none;
+        width: 260px;
+        color: orange;
+        caret-color: orange;
+        font-family: "Courier New", Courier, monospace;
+      }
+
+      input[type="password"]::placeholder {
+        color: rgba(255, 165, 0, 0.4);
+      }
+
+      button {
+        padding: 0;
+        width: 46px;
+        height: 43px;
+        background-color: orange;
+        color: #050d18;
+        border: 3px solid black;
+        border-left: none;
+        border-radius: 0;
+        font-size: 20px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background-color 0.2s;
+        font-family: "Courier New", Courier, monospace;
+      }
+
+      button:hover {
+        background-color: #e69500;
+      }
+
+      #message {
+        color: white;
+        font-size: 14px;
+        min-height: 20px;
+      }
+
+      .footer {
+        position: fixed;
+        bottom: 20px;
+        font-size: 12px;
+        color: rgba(255, 255, 255, 0.2);
+        letter-spacing: 1px;
+      }
+
+      .footer span {
+        color: rgba(255, 165, 0, 0.5);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="input-row">
+        <input
+          type="password"
+          id="passwordInput"
+          placeholder="Enter password"
+        />
+        <button onclick="signIn()">&#8594;</button>
+      </div>
+      <span id="message"></span>
+    </div>
+
+    <p class="footer">Secured by <span>Weblock</span></p>
+
+    <script>
+      async function signIn() {
+        const password = document.getElementById("passwordInput").value;
+        const message = document.getElementById("message");
+
+        if (!password) {
+          message.style.color = "#ff6b6b";
+          message.textContent = "Please enter a password.";
+          return;
+        }
+
+        try {
+          const response = await fetch("/weblock/signin", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ password }),
+          });
+
+          const data = await response.json();
+
+          if (data.success) {
+            message.style.color = "#90ee90";
+            message.textContent = "Signed in successfully!";
+            window.location.reload();
+          } else {
+            message.style.color = "#ff6b6b";
+            message.textContent = "Invalid password.";
+          }
+        } catch (error) {
+          message.style.color = "#ff6b6b";
+          message.textContent = "Connection error. Please try again.";
+        }
+      }
+
+      document.getElementById("passwordInput").addEventListener(
+        "keydown",
+        (e) => {
+          if (e.key === "Enter") signIn();
+        },
+      );
+    </script>
+  </body>
+</html>
