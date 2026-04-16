@@ -1,7 +1,4 @@
-use std::{fs::File, process::exit};
-
 use clap::{Parser, Subcommand};
-use daemonize::Daemonize;
 
 use crate::proxy::start_proxy;
 
@@ -25,20 +22,7 @@ pub enum Action {
         outport: u32,
         #[arg(short = 'p', long = "password")]
         password: String,
-        #[arg(short = 'd', long = "detach", default_value_t = false)]
-        detach: bool,
     },
-    Delete,
-}
-
-fn get_env(env_name: &str) -> String {
-    match std::env::var(env_name) {
-        Ok(a) => a,
-        Err(e) => {
-            eprintln!("Could not find the: {env_name} env variable: {e}");
-            exit(1)
-        }
-    }
 }
 
 #[cfg(unix)]
@@ -50,22 +34,9 @@ fn main() {
             inport,
             outport,
             password,
-            detach,
         } => {
-            if detach {
-                let stdout = File::create(format!("/tmp/{}-weblock.out", options.name)).unwrap();
-                let stderr = File::create(format!("/tmp/{}-weblock.err", options.name)).unwrap();
-                let daemon = Daemonize::new()
-                    .pid_file(format!("/tmp/{}-weblock.pid", options.name))
-                    .stdout(stdout)
-                    .stderr(stderr)
-                    .user(get_env("USER").as_str());
-
-                daemon.start().expect("Could not daemonize process");
-            }
             create_async_proxy(inport, outport, password);
         }
-        _ => {}
     }
 }
 
